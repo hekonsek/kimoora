@@ -1,4 +1,4 @@
-package org.kafkaless.datagrid.spi
+package grider.spi
 
 interface DataGridService {
 

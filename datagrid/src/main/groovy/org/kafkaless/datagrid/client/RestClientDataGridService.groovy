@@ -5,7 +5,7 @@ import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
-import org.kafkaless.datagrid.spi.DataGridService
+import grider.spi.DataGridService
 
 class RestClientDataGridService implements DataGridService {
 
@@ -51,7 +51,7 @@ class RestClientDataGridService implements DataGridService {
     @Override
     List<String> cacheKeys(String cacheName) {
         def request = new Request.Builder()
-                .url("${endpointUrl}/cacheGet/${cacheName}")
+                .url("${endpointUrl}/cacheKeys/${cacheName}")
                 .get()
                 .build();
         def response = client.newCall(request).execute()

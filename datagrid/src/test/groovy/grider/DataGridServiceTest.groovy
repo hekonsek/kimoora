@@ -1,9 +1,12 @@
-package org.kafkaless.datagrid.rest
+package grider
 
 import io.undertow.server.HttpServerExchange
 import org.junit.Test
 import org.kafkaless.datagrid.DataGridServiceBuilder
 import org.kafkaless.datagrid.client.RestClientDataGridService
+import org.kafkaless.datagrid.rest.Authentication
+import org.kafkaless.datagrid.rest.AuthenticationSubject
+import org.kafkaless.datagrid.rest.DataGridServiceRestEndpoint
 
 import static java.util.UUID.randomUUID
 import static org.assertj.core.api.Assertions.assertThat

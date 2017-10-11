@@ -1,14 +1,14 @@
 package org.kafkaless.datagrid
 
 import org.apache.commons.lang3.RandomStringUtils
+import org.junit.Ignore
 import org.junit.Test
 
 import static java.util.UUID.randomUUID
 import static org.assertj.core.api.Assertions.assertThat
 
+@Ignore
 class DefaultRestClientDataGridServiceTest {
-
-    static def dataGrid = new DataGridServiceBuilder().build()
 
     def collection = randomUUID().toString()
 
