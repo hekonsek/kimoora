@@ -7,6 +7,7 @@ import org.apache.ignite.cache.query.SqlFieldsQuery
 import org.apache.ignite.configuration.CacheConfiguration
 import org.apache.ignite.configuration.IgniteConfiguration
 import org.apache.ignite.configuration.PersistentStoreConfiguration
+import org.kafkaless.datagrid.spi.DataGridService
 
 import javax.cache.expiry.Duration
 import javax.cache.expiry.TouchedExpiryPolicy
@@ -16,11 +17,11 @@ import java.sql.SQLException
 
 import static java.util.concurrent.TimeUnit.DAYS
 
-class DataGridService {
+class DefaultDataGridService implements DataGridService {
 
     private final Ignite ignite
 
-    DataGridService(File igniteDirectory) {
+    DefaultDataGridService(File igniteDirectory) {
         def persistenceConfig = new PersistentStoreConfiguration().
                 setPersistentStorePath("${igniteDirectory.absolutePath}/store").
                 setWalStorePath("${igniteDirectory.absolutePath}/wal_store").

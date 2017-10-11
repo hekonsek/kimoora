@@ -4,8 +4,8 @@ import static com.google.common.io.Files.createTempDir
 
 class DataGridServiceBuilder {
 
-    DataGridService build() {
-        new DataGridService(createTempDir())
+    DefaultDataGridService build() {
+        new DefaultDataGridService(createTempDir())
     }
 
 }

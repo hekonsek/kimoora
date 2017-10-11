@@ -46,7 +46,6 @@
 
     <modules>
         <module>bom</module>
-        <module>management-app</module>
         <module>datagrid</module>
     </modules>
 

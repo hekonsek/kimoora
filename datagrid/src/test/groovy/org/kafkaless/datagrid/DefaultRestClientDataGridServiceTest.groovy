@@ -6,11 +6,9 @@ import org.junit.Test
 import static java.util.UUID.randomUUID
 import static org.assertj.core.api.Assertions.assertThat
 
-class DataGridServiceTest {
+class DefaultRestClientDataGridServiceTest {
 
     static def dataGrid = new DataGridServiceBuilder().build()
-
-    def cacheName = randomUUID().toString()
 
     def collection = randomUUID().toString()
 
@@ -21,30 +19,6 @@ class DataGridServiceTest {
     def table = RandomStringUtils.randomAlphabetic(20)
 
     def schema = [foo: String]
-
-    // Cache tests
-
-    @Test
-    void shouldGetFromCache() {
-        dataGrid.cachePut(cacheName, key, value)
-        def value = dataGrid.cacheGet(cacheName, key)
-        assertThat(value).isEqualTo(this.value)
-    }
-
-    @Test
-    void shouldRemoveFromCache() {
-        dataGrid.cachePut(cacheName, key, value)
-        dataGrid.cacheRemove(cacheName, key)
-        def value = dataGrid.cacheGet(cacheName, key)
-        assertThat(value).isNull()
-    }
-
-    @Test
-    void shouldListCacheKeys() {
-        dataGrid.cachePut(cacheName, key, value)
-        def keys = dataGrid.cacheKeys(cacheName)
-        assertThat(keys).contains(key)
-    }
 
     // Document operations tests
 
