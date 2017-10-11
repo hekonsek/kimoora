@@ -18,7 +18,7 @@ class DataGridServiceRestEndpoint {
         this.dataGridService = dataGridService
     }
 
-    void start() {
+    DataGridServiceRestEndpoint start() {
         Undertow.builder()
                 .addHttpListener(8080, '0.0.0.0')
                 .setHandler(new BlockingHandler(new HttpHandler() {
@@ -45,6 +45,7 @@ class DataGridServiceRestEndpoint {
                 exchange.getResponseSender().send(new ObjectMapper().writeValueAsString(response))
             }
         })).build().start()
+        this
     }
 
 }
