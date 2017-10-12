@@ -1,6 +1,7 @@
 package grider
 
 import io.undertow.server.HttpServerExchange
+import org.junit.Ignore
 import org.junit.Test
 import org.kafkaless.datagrid.DataGridServiceBuilder
 import org.kafkaless.datagrid.client.RestClientDataGridService
@@ -11,6 +12,7 @@ import org.kafkaless.datagrid.rest.DataGridServiceRestEndpoint
 import static java.util.UUID.randomUUID
 import static org.assertj.core.api.Assertions.assertThat
 
+@Ignore
 class DataGridServiceTest {
 
     static rest = new DataGridServiceRestEndpoint(new Authentication() {

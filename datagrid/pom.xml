@@ -21,6 +21,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk</artifactId>
+            <version>1.11.212</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.ignite</groupId>
             <artifactId>ignite-core</artifactId>
             <version>2.2.0</version>
@@ -29,6 +34,12 @@
             <groupId>org.apache.ignite</groupId>
             <artifactId>ignite-indexing</artifactId>
             <version>2.2.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.kafkaless</groupId>
+            <artifactId>kafkaless-core</artifactId>
+            <version>0.5</version>
         </dependency>
 
         <dependency>
