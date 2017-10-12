@@ -1,11 +1,13 @@
 package kimoora.client
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import kimoora.Kimoora
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
+
+import static kimoora.util.Json.fromJson
+import static kimoora.util.Json.jsonString
 
 class KimooraClient implements Kimoora {
 
@@ -21,13 +23,7 @@ class KimooraClient implements Kimoora {
 
     @Override
     void registerFunctionDefinition(String function, Map<String, Object> functionDefinition) {
-        def body = RequestBody.create(JSON, new ObjectMapper().writeValueAsString(functionDefinition))
-        def request = new Request.Builder()
-                .url("${endpointUrl}/registerFunctionDefinition/${function}")
-                .post(body)
-                .build();
-        def response = client.newCall(request).execute();
-        new ObjectMapper().readValue(response.body().bytes(), Map)
+        request("registerFunctionDefinition/${function}", functionDefinition)
     }
 
     @Override
@@ -37,18 +33,21 @@ class KimooraClient implements Kimoora {
                 .get()
                 .build()
         def response = client.newCall(request).execute();
-        new ObjectMapper().readValue(response.body().bytes(), Map)
+        fromJson(response.body().bytes())
     }
 
     @Override
     Map<String, Object> invoke(String operation, Map<String, Object> event) {
-        def body = RequestBody.create(JSON, new ObjectMapper().writeValueAsString(event))
-        def request = new Request.Builder()
-                .url("${endpointUrl}/invoke/${operation}")
-                .post(body)
-                .build();
-        def response = client.newCall(request).execute().body().bytes()
-        new ObjectMapper().readValue(response, Map)
+        request("invoke/${operation}", event)
+    }
+
+    // Helpers
+
+    private Map<String, Object> request(String uri, Map<String, Object> event) {
+        def body = RequestBody.create(JSON, jsonString(event))
+        def request = new Request.Builder().url("${endpointUrl}/${uri}").post(body).build()
+        def response = client.newCall(request).execute()
+        fromJson(response.body().bytes())
     }
 
 }
