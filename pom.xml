@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <licenses>
         <license>
@@ -51,6 +52,14 @@
 
     <build>
         <defaultGoal>clean install</defaultGoal>
+
+        <resources>
+            <resource>
+                <directory>src/main/docker</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+
         <pluginManagement>
             <plugins>
                 <plugin>
@@ -60,9 +69,12 @@
                     <configuration>
                         <images>
                             <image>
-                                <name>kafkaless/${image.target}</name>
+                                <name>kimoora/${image.target}</name>
                                 <build>
-                                    <from>smolok/fatjar:0.0.11</from>
+                                    <dockerFile>${project.build.directory}/classes/Dockerfile</dockerFile>
+                                    <assembly>
+                                        <descriptorRef>artifact</descriptorRef>
+                                    </assembly>
                                     <tags>
                                         <tag>latest</tag>
                                         <tag>${project.version}</tag>
@@ -85,7 +97,6 @@
                     <executions>
                         <execution>
                             <configuration>
-                                <classifier>fat</classifier>
                                 <mainClass>${mainClass}</mainClass>
                             </configuration>
                             <goals>

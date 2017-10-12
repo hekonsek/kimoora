@@ -19,6 +19,10 @@
     <artifactId>kimoora-server</artifactId>
     <name>${project.artifactId}</name>
 
+    <properties>
+        <mainClass>kimoora.KimooraApplication</mainClass>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>com.amazonaws</groupId>
@@ -110,6 +114,10 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+            </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
