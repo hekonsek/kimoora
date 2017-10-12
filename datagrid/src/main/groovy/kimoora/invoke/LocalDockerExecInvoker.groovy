@@ -1,7 +1,7 @@
 package kimoora.invoke
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import kimoora.Kimoora
+import kimoora.server.KimooraServer
 import kpipes.binding.util.docker.CommandLineDocker
 import kpipes.binding.util.docker.ContainerBuilder
 import kpipes.binding.util.process.DefaultProcessManager
@@ -12,7 +12,7 @@ class LocalDockerExecInvoker implements Invoker {
     private final json = new ObjectMapper()
 
     @Override
-    Map<String, Object> invoke(Kimoora kimoora, String operation, Map<String, Object> event) {
+    Map<String, Object> invoke(KimooraServer kimoora, String operation, Map<String, Object> event) {
         def eventJson = json.writeValueAsString(event)
         def artifact = kimoora.getFunctionDefinition(operation).artifact as String
 

@@ -1,24 +1,25 @@
-package org.kafkaless.datagrid.rest
+package kimoora.server
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.undertow.Undertow
 import io.undertow.server.HttpHandler
 import io.undertow.server.HttpServerExchange
 import io.undertow.server.handlers.BlockingHandler
+import kimoora.Kimoora
 import org.kafkaless.datagrid.DefaultDataGridService
 
-class DataGridServiceRestEndpoint {
+class RestEndpoint {
+
+    private final KimooraServer kimooraServer
 
     private final Authentication authentication
 
-    private final DefaultDataGridService dataGridService
-
-    DataGridServiceRestEndpoint(Authentication authentication, DefaultDataGridService dataGridService) {
+    RestEndpoint(KimooraServer kimooraServer, Authentication authentication) {
+        this.kimooraServer = kimooraServer
         this.authentication = authentication
-        this.dataGridService = dataGridService
     }
 
-    DataGridServiceRestEndpoint start() {
+    RestEndpoint start() {
         Undertow.builder()
                 .addHttpListener(8080, '0.0.0.0')
                 .setHandler(new BlockingHandler(new HttpHandler() {
@@ -29,17 +30,15 @@ class DataGridServiceRestEndpoint {
                 def path = uri.split(/\//)
 
                 Object response
-                if(path.first() == 'cachePut') {
+                if(path.first() == 'registerFunctionDefinition') {
                     def payload = new ObjectMapper().readValue(exchange.inputStream, Map)
-                    dataGridService.cachePut(path[1], path[2], payload)
+                    kimooraServer.registerFunctionDefinition(path[1], payload)
                     response = [status: 'OK']
-                } else if(path.first() == 'cacheGet') {
-                    response = dataGridService.cacheGet(path[1], path[2])
-                } else if(path.first() == 'cacheRemove') {
-                    dataGridService.cacheRemove(path[1], path[2])
-                    response = [status: 'OK']
-                } else if(path.first() == 'cacheKeys') {
-                    response = [keys: dataGridService.cacheKeys(path[1])]
+                } else   if(path.first() == 'getFunctionDefinition') {
+                    response = kimooraServer.getFunctionDefinition(path[1])
+                } else if(path.first() == 'invoke') {
+                    def payload = new ObjectMapper().readValue(exchange.inputStream, Map)
+                    response = kimooraServer.invoke(path[1], payload)
                 }
 
                 exchange.getResponseSender().send(new ObjectMapper().writeValueAsString(response))

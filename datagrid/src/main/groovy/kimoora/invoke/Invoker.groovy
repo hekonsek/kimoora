@@ -1,9 +1,9 @@
 package kimoora.invoke
 
-import kimoora.Kimoora
+import kimoora.server.KimooraServer
 
 interface Invoker {
 
-    Map<String, Object> invoke(Kimoora kimoora, String operation, Map<String, Object> event)
+    Map<String, Object> invoke(KimooraServer kimoora, String operation, Map<String, Object> event)
 
 }

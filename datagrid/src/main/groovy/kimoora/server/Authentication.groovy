@@ -1,4 +1,4 @@
-package org.kafkaless.datagrid.rest;
+package kimoora.server;
 
 import io.undertow.server.HttpServerExchange
 

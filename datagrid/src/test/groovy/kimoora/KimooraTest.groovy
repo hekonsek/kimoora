@@ -1,5 +1,6 @@
 package kimoora
 
+import kimoora.client.KimooraClient
 import org.junit.Test
 
 import static java.util.UUID.randomUUID
@@ -7,7 +8,11 @@ import static org.assertj.core.api.Assertions.assertThat
 
 class KimooraTest {
 
-    static kimoora = new KimooraBuilder().build()
+    static {
+        new KimooraBuilder().build()
+    }
+
+    def kimoora = new KimooraClient('http://localhost:8080')
 
     def function = randomUUID().toString()
 

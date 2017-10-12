@@ -1,13 +1,7 @@
 package grider
 
-import io.undertow.server.HttpServerExchange
 import org.junit.Ignore
 import org.junit.Test
-import org.kafkaless.datagrid.DataGridServiceBuilder
-import org.kafkaless.datagrid.client.RestClientDataGridService
-import org.kafkaless.datagrid.rest.Authentication
-import org.kafkaless.datagrid.rest.AuthenticationSubject
-import org.kafkaless.datagrid.rest.DataGridServiceRestEndpoint
 
 import static java.util.UUID.randomUUID
 import static org.assertj.core.api.Assertions.assertThat
@@ -15,14 +9,6 @@ import static org.assertj.core.api.Assertions.assertThat
 @Ignore
 class DataGridServiceTest {
 
-    static rest = new DataGridServiceRestEndpoint(new Authentication() {
-        @Override
-        AuthenticationSubject authenticate(HttpServerExchange exchange) {
-            return null
-        }
-    }, new DataGridServiceBuilder().build()).start()
-
-    def dataGrid = new RestClientDataGridService('http://localhost:8080')
 
     def cacheName = randomUUID().toString()
 

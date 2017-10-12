@@ -1,8 +1,11 @@
 package kimoora
 
-import kimoora.invoke.AwsLambdaInvoker
+import io.undertow.server.HttpServerExchange
 import kimoora.invoke.Invoker
 import kimoora.invoke.LocalDockerExecInvoker
+import kimoora.server.Authentication
+import kimoora.server.AuthenticationSubject
+import kimoora.server.KimooraServer
 
 import static com.google.common.io.Files.createTempDir
 
@@ -16,7 +19,12 @@ class KimooraBuilder {
     }
 
     Kimoora build() {
-        new Kimoora(createTempDir(), invoker).start()
+        new KimooraServer(createTempDir(), invoker, new Authentication() {
+            @Override
+            AuthenticationSubject authenticate(HttpServerExchange exchange) {
+                return null
+            }
+        }).start()
     }
 
 }
