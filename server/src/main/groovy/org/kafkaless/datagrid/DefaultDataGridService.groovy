@@ -32,34 +32,20 @@ class DefaultDataGridService implements DataGridService {
         ignite.active(true)
     }
 
-    // Cache operations
-
-    private CacheConfiguration<String, Map<String, Object>> cacheConfiguration(String cacheName) {
-        new CacheConfiguration<String, Map<String, Object>>().setName("cache_${cacheName}").
-                setExpiryPolicyFactory(TouchedExpiryPolicy.factoryOf(new Duration(DAYS, 2)))
-    }
-
-    void cachePut(String cacheName, String key, Map<String, Object> value) {
-        ignite.getOrCreateCache(cacheConfiguration(cacheName)).put(key, value)
-    }
-
-    Map<String, Object> cacheGet(String cacheName, String key) {
-        ignite.getOrCreateCache(cacheConfiguration(cacheName)).get(key)
-    }
-
-    void cacheRemove(String cacheName, String key) {
-        ignite.getOrCreateCache(cacheConfiguration(cacheName)).remove(key)
-    }
-
-    List<String> cacheKeys(String cacheName) {
-        def entries = ignite.getOrCreateCache(cacheConfiguration(cacheName)).iterator()
-        entries.inject([]) { keys, entry -> keys << entry.key; keys }
-    }
-
     // Document operations
 
     private IgniteCache<String, Map<String, Object>> documentConfiguration(String collection) {
         ignite.getOrCreateCache(new CacheConfiguration<String, Map<String, Object>>().setName("document_${collection}"))
+    }
+
+    @Override
+    void cacheRemove(String cacheName, String key) {
+
+    }
+
+    @Override
+    List<String> cacheKeys(String cacheName) {
+        return null
     }
 
     void documentPut(String collection, String key, Map<String, Object> value) {

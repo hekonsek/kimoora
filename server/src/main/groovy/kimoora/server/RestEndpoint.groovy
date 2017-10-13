@@ -37,6 +37,19 @@ class RestEndpoint {
                 } else if(path.first() == 'invoke') {
                     def payload = new ObjectMapper().readValue(exchange.inputStream, Map)
                     response = kimooraServer.invoke(path[1], payload)
+                } else if(path.first() == 'cacheGet') {
+                    response = kimooraServer.cacheGet(path[1], path[2])
+                } else if(path.first() == 'cachePut') {
+                    def payload = new ObjectMapper().readValue(exchange.inputStream, Map)
+                    kimooraServer.cachePut(path[1], path[2], payload)
+                    response = [status: 'OK']
+                } else if(path.first() == 'cacheRemove') {
+                    kimooraServer.cacheRemove(path[1], path[2])
+                    response = [status: 'OK']
+                } else if(path.first() == 'cacheKeys') {
+                    response = [keys: kimooraServer.cacheKeys(path[1])]
+                } else {
+                    throw new UnsupportedOperationException(path.first())
                 }
 
                 exchange.getResponseSender().send(new ObjectMapper().writeValueAsString(response))

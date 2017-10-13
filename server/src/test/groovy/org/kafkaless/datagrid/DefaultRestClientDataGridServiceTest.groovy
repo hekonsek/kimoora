@@ -24,7 +24,7 @@ class DefaultRestClientDataGridServiceTest {
 
     @Test
     void shouldGetDocument() {
-        dataGrid.documentPut(collection, key, value)
+        kimoora.documentPut(collection, key, value)
         def value = dataGrid.documentGet(collection, key)
         assertThat(value).isEqualTo(this.value)
     }

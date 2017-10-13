@@ -3,7 +3,7 @@ package kimoora
 import kimoora.client.KimooraClient
 import org.junit.Test
 
-import static java.util.UUID.randomUUID
+import static kimoora.util.Ids.uuid
 import static org.assertj.core.api.Assertions.assertThat
 
 class KimooraTest {
@@ -14,7 +14,37 @@ class KimooraTest {
 
     def kimoora = new KimooraClient('http://localhost:8080')
 
-    def function = randomUUID().toString()
+    def cacheName = uuid()
+
+    def key = uuid()
+
+    def value = [foo: uuid()]
+
+    def function = uuid()
+
+    @Test
+    void shouldGetFromCache() {
+        kimoora.cachePut(cacheName, key, value)
+        def value = kimoora.cacheGet(cacheName, key)
+        assertThat(value).isEqualTo(this.value)
+    }
+
+    @Test
+    void shouldRemoveFromCache() {
+        kimoora.cachePut(cacheName, key, value)
+        kimoora.cacheRemove(cacheName, key)
+        def value = kimoora.cacheGet(cacheName, key)
+        assertThat(value).isNull()
+    }
+
+    @Test
+    void shouldListCacheKeys() {
+        kimoora.cachePut(cacheName, key, value)
+        def keys = kimoora.cacheKeys(cacheName)
+        assertThat(keys).contains(key)
+    }
+
+    // Invoke operations tests
 
     @Test
     void shouldExecuteDockerFunction() {

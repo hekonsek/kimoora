@@ -4,10 +4,6 @@ interface DataGridService {
 
     // Cache operations
 
-    void cachePut(String cacheName, String key, Map<String, Object> value)
-
-    Map<String, Object> cacheGet(String cacheName, String key)
-
     void cacheRemove(String cacheName, String key)
 
     List<String> cacheKeys(String cacheName)
