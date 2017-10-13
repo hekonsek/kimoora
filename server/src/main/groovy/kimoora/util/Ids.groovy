@@ -1,5 +1,5 @@
 /**
- * Licensed to the Kafkaless under one or more
+ * Licensed to the Kimoora under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * The licenses this file to You under the Apache License, Version 2.0
@@ -16,25 +16,23 @@
  */
 package kimoora.util
 
-import org.junit.Test
+import org.apache.commons.text.RandomStringGenerator
 
-import static java.util.UUID.fromString
-import static org.assertj.core.api.Assertions.assertThat
+import static java.util.UUID.randomUUID
 
-class UuidsTest {
+final class Ids {
 
-    // Tests
+    private static final stringGenerator = new RandomStringGenerator.Builder().withinRange('a'.charAt(0) as int, 'z'.charAt(0) as int).build()
 
-    @Test
-    void shouldGenerateUuidString() {
-        // Given
-        def uuidString = org.kafkaless.util.Uuids.uuid()
+    private Ids() {
+    }
 
-        // When
-        def parsedUuid = fromString(uuidString)
+    static String uuid() {
+        randomUUID().toString()
+    }
 
-        // Then
-        assertThat(uuidString).isEqualTo(parsedUuid.toString())
+    static String randomStringId() {
+        stringGenerator.generate(10)
     }
 
 }

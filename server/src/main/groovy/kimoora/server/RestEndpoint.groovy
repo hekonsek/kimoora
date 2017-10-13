@@ -5,8 +5,6 @@ import io.undertow.Undertow
 import io.undertow.server.HttpHandler
 import io.undertow.server.HttpServerExchange
 import io.undertow.server.handlers.BlockingHandler
-import kimoora.Kimoora
-import org.kafkaless.datagrid.DefaultDataGridService
 
 class RestEndpoint {
 
