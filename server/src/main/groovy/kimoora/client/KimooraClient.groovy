@@ -14,11 +14,14 @@ class KimooraClient implements Kimoora {
 
     private static final JSON = MediaType.parse("application/json; charset=utf-8")
 
+    private final TokenProvider tokenProvider
+
     private final String endpointUrl
 
     private final client = new OkHttpClient()
 
-    KimooraClient(String endpointUrl) {
+    KimooraClient(TokenProvider tokenProvider, String endpointUrl) {
+        this.tokenProvider = tokenProvider
         this.endpointUrl = endpointUrl
     }
 
@@ -63,19 +66,21 @@ class KimooraClient implements Kimoora {
 
     private Map<String, Object> request(String uri, Map<String, Object> event) {
         def body = RequestBody.create(JSON, jsonString(event))
-        def request = new Request.Builder().url("${endpointUrl}/${uri}").post(body).build()
+        def request = new Request.Builder().url("${endpointUrl}/${uri}").post(body).
+                header('Authentication',"Bearer ${tokenProvider.token()}").build()
         def response = client.newCall(request).execute()
         fromJson(response.body().bytes())
     }
 
     private Map<String, Object> request(String uri) {
-        def request = new Request.Builder().url("${endpointUrl}/${uri}").get().build()
+        def request = new Request.Builder().url("${endpointUrl}/${uri}").get().
+                header('Authentication',"Bearer ${tokenProvider.token()}").build()
         def response = client.newCall(request).execute()
         fromJson(response.body().bytes())
     }
 
     private void validateOkResponse(Map<String, Object> response) {
-        Validate.isTrue(response.status == 'OK')
+        Validate.isTrue(response.status == 'OK', "Expected status to be OK. Found: ${response}")
     }
 
 }

@@ -6,9 +6,12 @@ class AuthenticationSubject {
 
     private final String username
 
-    AuthenticationSubject(String tenant, String username) {
+    private final List<String> roles
+
+    AuthenticationSubject(String tenant, String username, List<String> roles) {
         this.tenant = tenant
         this.username = username
+        this.roles = roles
     }
 
     String tenant() {
@@ -17,6 +20,10 @@ class AuthenticationSubject {
 
     String username() {
         username
+    }
+
+    List<String> roles() {
+        roles
     }
 
 }
