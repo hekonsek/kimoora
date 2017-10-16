@@ -15,11 +15,18 @@ class LocalDockerExecInvoker implements Invoker {
     @Override
     Map<String, Object> invoke(KimooraServer kimoora, String operation, Map<String, Object> event) {
         def eventJson = json.writeValueAsString(event)
-        def artifact = kimoora.getFunctionDefinition(operation).artifact as String
+        def functionDefinition = kimoora.getFunctionDefinition(operation)
+        if (functionDefinition == null) {
+            throw new IllegalArgumentException('Unknown function.')
+        }
+        def artifact = functionDefinition.artifact as String
 
         def environment = [FRONT_DOOR_ENDPOINT: 'localhost']
 
-        new DefaultProcessManager(new SudoResolver()).execute(Command.cmd("docker pull ${artifact}")).size()
+        def imageExists = new DefaultProcessManager(new SudoResolver()).execute(Command.cmd("docker images ${artifact}")).size() > 1
+        if (!imageExists) {
+            new DefaultProcessManager(new SudoResolver()).execute(Command.cmd("docker pull ${artifact}")).size()
+        }
         def commandResponse = new CommandLineDocker(new DefaultProcessManager(new SudoResolver())).execute(new ContainerBuilder(artifact).cleanUp(true).net('host').environment(environment).arguments(eventJson).build())
         def response = commandResponse.first()
 

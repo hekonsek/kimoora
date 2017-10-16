@@ -98,12 +98,19 @@ class KimooraServer implements Kimoora {
 
     // Functions definitions operations
 
-    void registerFunctionDefinition(String function, Map<String, Object> functionDefinition) {
-        ignite.getOrCreateCache('kimoora_functions').put(function, functionDefinition)
+    void registerFunctionDefinition(String functionId, Map<String, Object> function) {
+        ignite.getOrCreateCache('kimoora_functions').put(functionId, function)
     }
 
     Map<String, Object> getFunctionDefinition(String function) {
         ignite.getOrCreateCache('kimoora_functions').get(function)
+    }
+
+    @Override
+    Map<String, Map<String, Object>> listFunctionsDefinitions() {
+        ignite.getOrCreateCache('kimoora_functions').iterator().inject([:]) { functions, function ->
+            functions[function.key] = function.value; functions
+        }
     }
 
     // Cache operations

@@ -28,11 +28,30 @@ class KimooraTest {
 
     def collection = randomUUID().toString()
 
-    def function = uuid()
+    def functionId = uuid()
+
+    def function = [artifact: 'hekonsek/echogo']
 
     def pipeId = "pipeId-${randomStringId()}"
 
-    def pipe = [from: randomStringId(), function: function, cache: randomStringId()]
+    def pipe = [from: randomStringId(), function: functionId, cache: randomStringId()]
+
+    // Functions definitions operations tests
+
+    @Test
+    void shouldListFunctions() {
+        // Given
+        kimoora.registerFunctionDefinition(functionId, function)
+
+        // When
+        def functions = kimoora.listFunctionsDefinitions()
+
+        // Then
+        def registeredFunction = functions.find { it.key == functionId }
+        assertThat(registeredFunction).isNotNull()
+    }
+
+    // Cache operations tests
 
     @Test
     void shouldGetFromCache() {
@@ -85,10 +104,10 @@ class KimooraTest {
     @Test
     void shouldExecuteDockerFunction() {
         // Given
-        kimoora.registerFunctionDefinition(function, [artifact: 'hekonsek/echogo'])
+        kimoora.registerFunctionDefinition(functionId, [artifact: 'hekonsek/echogo'])
 
         // When
-        def response = kimoora.invoke(function, [hello: 'world'])
+        def response = kimoora.invoke(functionId, [hello: 'world'])
 
         // Then
         assertThat(response).containsEntry('hello', 'world')
@@ -99,7 +118,7 @@ class KimooraTest {
     @Test
     void shouldCacheProcessedStream() {
         // Given
-        kimoora.registerFunctionDefinition(function, [artifact: 'hekonsek/echogo'])
+        kimoora.registerFunctionDefinition(functionId, [artifact: 'hekonsek/echogo'])
         kimoora.addPipe(pipeId, pipe)
 
         // When
@@ -115,7 +134,7 @@ class KimooraTest {
     @Test
     void shouldMulticastStream() {
         // Given
-        kimoora.registerFunctionDefinition(function, [artifact: 'hekonsek/echogo'])
+        kimoora.registerFunctionDefinition(functionId, [artifact: 'hekonsek/echogo'])
         def multicast = [randomStringId(), randomStringId()]
         pipe.multicast = multicast
         pipe.to = null

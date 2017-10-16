@@ -40,13 +40,18 @@ class KimooraClient implements Kimoora {
     // Functions definitions operations
 
     @Override
-    void registerFunctionDefinition(String function, Map<String, Object> functionDefinition) {
-        validateOkResponse(request("registerFunctionDefinition/${function}", functionDefinition))
+    void registerFunctionDefinition(String functionId, Map<String, Object> function) {
+        validateOkResponse(request("registerFunctionDefinition/${functionId}", function))
     }
 
     @Override
     Map<String, Object> getFunctionDefinition(String function) {
         request("getFunctionDefinition/${function}")
+    }
+
+    @Override
+    Map<String, Map<String, Object>> listFunctionsDefinitions() {
+        request('listFunctionsDefinitions')
     }
 
     // Cache operations

@@ -10,9 +10,11 @@ interface Kimoora {
 
     // Functions definitions operations
 
-    void registerFunctionDefinition(String function, Map<String, Object> functionDefinition)
+    void registerFunctionDefinition(String functionId, Map<String, Object> function)
 
     Map<String, Object> getFunctionDefinition(String function)
+
+    Map<String, Map<String, Object>> listFunctionsDefinitions()
 
     // Cache operations
 

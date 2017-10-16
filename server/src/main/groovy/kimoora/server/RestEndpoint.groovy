@@ -46,6 +46,8 @@ class RestEndpoint {
                         response = [status: 'OK']
                     } else if (path.first() == 'getFunctionDefinition') {
                         response = kimooraServer.getFunctionDefinition(path[1])
+                    } else if (path.first() == 'listFunctionsDefinitions') {
+                        response = kimooraServer.listFunctionsDefinitions()
                     } else if (path.first() == 'invoke') {
                         def payload = new ObjectMapper().readValue(exchange.inputStream, Map)
                         response = kimooraServer.invoke(path[1], payload)
