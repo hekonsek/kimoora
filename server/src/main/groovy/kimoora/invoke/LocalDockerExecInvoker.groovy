@@ -18,7 +18,8 @@ class LocalDockerExecInvoker implements Invoker {
 
         def environment = [FRONT_DOOR_ENDPOINT: 'localhost']
 
-        def response = new CommandLineDocker(new DefaultProcessManager(new SudoResolver())).execute(new ContainerBuilder(artifact).cleanUp(true).net('host').environment(environment).arguments(eventJson).build()).first()
+        def commandResponse = new CommandLineDocker(new DefaultProcessManager(new SudoResolver())).execute(new ContainerBuilder(artifact).cleanUp(true).net('host').environment(environment).arguments(eventJson).build())
+        def response = commandResponse.find{ !it.startsWith('Unable to find image') }
 
         json.readValue(response, Map)
     }
