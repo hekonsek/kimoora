@@ -14,19 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package kimoora.util
+package kimoora.util.process
 
-import org.junit.Test
+import com.google.common.collect.ImmutableList;
 
-import static org.assertj.core.api.Assertions.assertThat
+/**
+ * Mock process manager returning command input as an output.
+ */
+class EchoMockProcessManager extends ExecutorBasedProcessManager {
 
-class JsonTest {
-
-    @Test
-    void shouldSerializeMap() {
-        def object = [hello: 'world']
-        def bytes = Json.jsonBytes(object)
-        assertThat(new String(bytes)).contains('"hello"')
+    @Override
+    List<String> execute(Command command) {
+        ImmutableList.copyOf(command.command)
     }
 
 }

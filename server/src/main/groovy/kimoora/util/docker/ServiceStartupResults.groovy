@@ -14,19 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package kimoora.util
+package kimoora.util.docker
 
-import org.junit.Test
-
-import static org.assertj.core.api.Assertions.assertThat
-
-class JsonTest {
-
-    @Test
-    void shouldSerializeMap() {
-        def object = [hello: 'world']
-        def bytes = Json.jsonBytes(object)
-        assertThat(new String(bytes)).contains('"hello"')
-    }
-
+enum ServiceStartupResults {
+    created, started, alreadyRunning
 }

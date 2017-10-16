@@ -2,11 +2,11 @@ package kimoora.invoke
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import kimoora.server.KimooraServer
-import kpipes.binding.util.docker.CommandLineDocker
-import kpipes.binding.util.docker.ContainerBuilder
-import kpipes.binding.util.process.Command
-import kpipes.binding.util.process.DefaultProcessManager
-import kpipes.binding.util.process.SudoResolver
+import kimoora.util.docker.CommandLineDocker
+import kimoora.util.docker.ContainerBuilder
+import kimoora.util.process.Command
+import kimoora.util.process.DefaultProcessManager
+import kimoora.util.process.SudoResolver
 
 class LocalDockerExecInvoker implements Invoker {
 
@@ -21,7 +21,7 @@ class LocalDockerExecInvoker implements Invoker {
         }
         def artifact = functionDefinition.artifact as String
 
-        def environment = [FRONT_DOOR_ENDPOINT: 'localhost']
+        def environment = [KIMOORA_FRONT_DOOR_ENDPOINT: 'http://localhost:8080']
 
         def imageExists = new DefaultProcessManager(new SudoResolver()).execute(Command.cmd("docker images ${artifact}")).size() > 1
         if (!imageExists) {
