@@ -24,6 +24,16 @@ interface Kimoora {
 
     List<String> cacheKeys(String cacheName)
 
+    // Document operations
+
+    void documentPut(String collection, String key, Map<String, Object> value)
+
+    Map<String, Object> documentGet(String collection, String key)
+
+    void documentRemove(String collection, String key)
+
+    List<String> documentsKeys(String collection)
+
     // Invoke operations
 
     Map<String, Object> invoke(String operation, Map<String, Object> event)
@@ -31,6 +41,8 @@ interface Kimoora {
     // Streams operations
 
     void sendToStream(String stream, String eventId, Map<String, Object> event)
+
+    int streamBacklogSize(String stream)
 
     void addPipe(String pipeId, Map<String, Object> pipeDefinition)
 

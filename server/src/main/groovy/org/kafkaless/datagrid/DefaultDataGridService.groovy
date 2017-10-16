@@ -32,39 +32,6 @@ class DefaultDataGridService implements DataGridService {
         ignite.active(true)
     }
 
-    // Document operations
-
-    private IgniteCache<String, Map<String, Object>> documentConfiguration(String collection) {
-        ignite.getOrCreateCache(new CacheConfiguration<String, Map<String, Object>>().setName("document_${collection}"))
-    }
-
-    @Override
-    void cacheRemove(String cacheName, String key) {
-
-    }
-
-    @Override
-    List<String> cacheKeys(String cacheName) {
-        return null
-    }
-
-    void documentPut(String collection, String key, Map<String, Object> value) {
-        documentConfiguration(collection).put(key, value)
-    }
-
-    Map<String, Object> documentGet(String collection, String key) {
-        documentConfiguration(collection).get(key)
-    }
-
-    void documentRemove(String collection, String key) {
-        documentConfiguration(collection).remove(key)
-    }
-
-    List<String> documentsKeys(String collection) {
-        def entries = documentConfiguration(collection).iterator()
-        entries.inject([]) { keys, entry -> keys << entry.key; keys }
-    }
-
     // SQL operations
 
     void assertSqlSchema(String table, Map<String, Object> schema) {

@@ -4,6 +4,7 @@ import kimoora.client.KimooraClient
 import kimoora.client.KimooraUsernamePasswordTokenProvider
 import org.junit.Test
 
+import static java.util.UUID.randomUUID
 import static kimoora.util.Ids.randomStringId
 import static kimoora.util.Ids.uuid
 import static org.assertj.core.api.Assertions.assertThat
@@ -24,6 +25,8 @@ class KimooraTest {
     def key = uuid()
 
     def event = [foo: uuid()]
+
+    def collection = randomUUID().toString()
 
     def function = uuid()
 
@@ -53,6 +56,30 @@ class KimooraTest {
         assertThat(keys).contains(key)
     }
 
+    // Document operations tests
+
+    @Test
+    void shouldGetDocument() {
+        kimoora.documentPut(collection, key, event)
+        def value = kimoora.documentGet(collection, key)
+        assertThat(value).isEqualTo(this.event)
+    }
+
+    @Test
+    void shouldRemoveFromDocuments() {
+        kimoora.documentPut(collection, key, event)
+        kimoora.documentRemove(collection, key)
+        def value = kimoora.documentGet(collection, key)
+        assertThat(value).isNull()
+    }
+
+    @Test
+    void shouldListDocumentKeys() {
+        kimoora.documentPut(collection, key, event)
+        def keys = kimoora.documentsKeys(collection)
+        assertThat(keys).contains(key)
+    }
+
     // Invoke operations tests
 
     @Test
@@ -67,7 +94,7 @@ class KimooraTest {
         assertThat(response).containsEntry('hello', 'world')
     }
 
-    // Pipes tests
+    // Streams tests
 
     @Test
     void shouldCacheProcessedStream() {
@@ -84,5 +111,27 @@ class KimooraTest {
             assertThat(cachedResult).isNotNull()
         }
     }
+
+    @Test
+    void shouldMulticastStream() {
+        // Given
+        kimoora.registerFunctionDefinition(function, [artifact: 'hekonsek/echogo'])
+        def multicast = [randomStringId(), randomStringId()]
+        pipe.multicast = multicast
+        pipe.to = null
+        kimoora.addPipe(pipeId, pipe)
+
+        // When
+        kimoora.sendToStream(pipe.from, key, event)
+
+        // Then
+        await().untilAsserted {
+            def firstMulticastResult = kimoora.streamBacklogSize(multicast[0])
+            assertThat(firstMulticastResult).isEqualTo(1)
+            def secondMulticastResult = kimoora.streamBacklogSize(multicast[1])
+            assertThat(secondMulticastResult).isEqualTo(1)
+        }
+    }
+
 
 }

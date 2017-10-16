@@ -20,30 +20,6 @@ class DefaultRestClientDataGridServiceTest {
 
     def schema = [foo: String]
 
-    // Document operations tests
-
-    @Test
-    void shouldGetDocument() {
-        kimoora.documentPut(collection, key, value)
-        def value = dataGrid.documentGet(collection, key)
-        assertThat(value).isEqualTo(this.value)
-    }
-
-    @Test
-    void shouldRemoveFromDocuments() {
-        dataGrid.documentPut(collection, key, value)
-        dataGrid.documentRemove(collection, key)
-        def value = dataGrid.documentGet(collection, key)
-        assertThat(value).isNull()
-    }
-
-    @Test
-    void shouldListDocumentKeys() {
-        dataGrid.documentPut(collection, key, value)
-        def keys = dataGrid.documentsKeys(collection)
-        assertThat(keys).contains(key)
-    }
-
     // SQL operations tests
 
     @Test

@@ -60,6 +60,17 @@ class RestEndpoint {
                         response = [status: 'OK']
                     } else if (path.first() == 'cacheKeys') {
                         response = [keys: kimooraServer.cacheKeys(path[1])]
+                    } else if (path.first() == 'documentGet') {
+                        response = kimooraServer.documentGet(path[1], path[2])
+                    } else if (path.first() == 'documentPut') {
+                        def payload = new ObjectMapper().readValue(exchange.inputStream, Map)
+                        kimooraServer.documentPut(path[1], path[2], payload)
+                        response = [status: 'OK']
+                    } else if (path.first() == 'documentRemove') {
+                        kimooraServer.documentRemove(path[1], path[2])
+                        response = [status: 'OK']
+                    } else if (path.first() == 'documentsKeys') {
+                        response = [keys: kimooraServer.documentsKeys(path[1])]
                     } else if (path.first() == 'addUser') {
                         def payload = new ObjectMapper().readValue(exchange.inputStream, Map)
                         kimooraServer.addUser(path[1], payload.password as String, payload.roles as List<String>)
@@ -68,6 +79,8 @@ class RestEndpoint {
                         def payload = new ObjectMapper().readValue(exchange.inputStream, Map)
                         kimooraServer.sendToStream(path[1], path[2], payload)
                         response = [status: 'OK']
+                    } else if (path.first() == 'streamBacklogSize') {
+                        response = [backlogSize: kimooraServer.streamBacklogSize(path[1])]
                     } else if (path.first() == 'addPipe') {
                         def payload = new ObjectMapper().readValue(exchange.inputStream, Map)
                         kimooraServer.addPipe(path[1], payload)

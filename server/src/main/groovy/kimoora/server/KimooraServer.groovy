@@ -130,6 +130,29 @@ class KimooraServer implements Kimoora {
                 setExpiryPolicyFactory(TouchedExpiryPolicy.factoryOf(new Duration(DAYS, 2))))
     }
 
+    // Document operations
+
+    private IgniteCache<String, Map<String, Object>> documentConfiguration(String collection) {
+        ignite.getOrCreateCache(new CacheConfiguration<String, Map<String, Object>>().setName("document_${collection}"))
+    }
+
+    void documentPut(String collection, String key, Map<String, Object> value) {
+        documentConfiguration(collection).put(key, value)
+    }
+
+    Map<String, Object> documentGet(String collection, String key) {
+        documentConfiguration(collection).get(key)
+    }
+
+    void documentRemove(String collection, String key) {
+        documentConfiguration(collection).remove(key)
+    }
+
+    List<String> documentsKeys(String collection) {
+        def entries = documentConfiguration(collection).iterator()
+        entries.inject([]) { keys, entry -> keys << entry.key; keys }
+    }
+
     // Invoke operations
 
     Map<String, Object> invoke(String operation, Map<String, Object> event) {
@@ -141,6 +164,11 @@ class KimooraServer implements Kimoora {
     @Override
     void sendToStream(String stream, String eventId, Map<String, Object> event) {
         ignite.queue(stream, 0, new CollectionConfiguration()).add([key: eventId, event: event])
+    }
+
+    @Override
+    int streamBacklogSize(String stream) {
+        ignite.queue(stream, 0, new CollectionConfiguration()).size()
     }
 
     @Override
@@ -167,6 +195,14 @@ class KimooraServer implements Kimoora {
             targetQueue = ignite.queue(to, 0, new CollectionConfiguration())
         }
 
+        def multicast = pipeDefinition.multicast as String[]
+        List<IgniteQueue> targetQueues = []
+        if(multicast != null) {
+            multicast.each {
+                targetQueues.add(ignite.queue(it, 0, new CollectionConfiguration()))
+            }
+        }
+
         def cache = pipeDefinition.cache as String
         25.times {
             pipeExecutor.submit(new Runnable() {
@@ -191,6 +227,12 @@ class KimooraServer implements Kimoora {
 
                         if(to != null) {
                             targetQueue.add(result)
+                        }
+
+                        if(multicast != null) {
+                            targetQueues.each {
+                                it.add(result)
+                            }
                         }
                     }
                 }

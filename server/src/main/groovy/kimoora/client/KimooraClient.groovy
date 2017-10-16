@@ -71,6 +71,26 @@ class KimooraClient implements Kimoora {
         request("cacheKeys/${cacheName}").keys as List
     }
 
+    @Override
+    void documentPut(String collection, String key, Map<String, Object> value) {
+        validateOkResponse(request("documentPut/${collection}/${key}", value))
+    }
+
+    @Override
+    Map<String, Object> documentGet(String collection, String key) {
+        request("documentGet/${collection}/${key}")
+    }
+
+    @Override
+    void documentRemove(String collection, String key) {
+        validateOkResponse(request("documentRemove/${collection}/${key}"))
+    }
+
+    @Override
+    List<String> documentsKeys(String collection) {
+        request("documentsKeys/${collection}").keys as List
+    }
+
     // Invoke operations
 
     @Override
@@ -83,6 +103,11 @@ class KimooraClient implements Kimoora {
     @Override
     void sendToStream(String stream, String eventId, Map<String, Object> event) {
         validateOkResponse(request("sendToStream/${stream}/${eventId}", event))
+    }
+
+    @Override
+    int streamBacklogSize(String stream) {
+        request("streamBacklogSize/${stream}").backlogSize as int
     }
 
     @Override
