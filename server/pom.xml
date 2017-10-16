@@ -21,6 +21,7 @@
 
     <properties>
         <mainClass>kimoora.KimooraApplication</mainClass>
+        <image.target>server</image.target>
     </properties>
 
     <dependencies>
