@@ -28,4 +28,10 @@ interface Kimoora {
 
     Map<String, Object> invoke(String operation, Map<String, Object> event)
 
+    // Streams operations
+
+    void sendToStream(String stream, String eventId, Map<String, Object> event)
+
+    void addPipe(String pipeId, Map<String, Object> pipeDefinition)
+
 }

@@ -25,6 +25,8 @@ class KimooraClient implements Kimoora {
         this.endpointUrl = endpointUrl
     }
 
+    // User management operations
+
     @Override
     void addUser(String username, String password, List<String> roles) {
         validateOkResponse(request("addUser/${username}", [password: password, roles: roles]))
@@ -35,6 +37,8 @@ class KimooraClient implements Kimoora {
         request('login', [username: username, password: password])
     }
 
+    // Functions definitions operations
+
     @Override
     void registerFunctionDefinition(String function, Map<String, Object> functionDefinition) {
         validateOkResponse(request("registerFunctionDefinition/${function}", functionDefinition))
@@ -44,6 +48,8 @@ class KimooraClient implements Kimoora {
     Map<String, Object> getFunctionDefinition(String function) {
         request("getFunctionDefinition/${function}")
     }
+
+    // Cache operations
 
     @Override
     void cachePut(String cacheName, String key, Map<String, Object> value) {
@@ -70,6 +76,18 @@ class KimooraClient implements Kimoora {
     @Override
     Map<String, Object> invoke(String operation, Map<String, Object> event) {
         request("invoke/${operation}", event)
+    }
+
+    // Streams operations
+
+    @Override
+    void sendToStream(String stream, String eventId, Map<String, Object> event) {
+        validateOkResponse(request("sendToStream/${stream}/${eventId}", event))
+    }
+
+    @Override
+    void addPipe(String pipeId, Map<String, Object> pipeDefinition) {
+        validateOkResponse(request("addPipe/${pipeId}", pipeDefinition))
     }
 
     // Helpers

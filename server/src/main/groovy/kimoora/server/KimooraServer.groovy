@@ -5,19 +5,27 @@ import kimoora.Kimoora
 import kimoora.invoke.Invoker
 import org.apache.ignite.Ignite
 import org.apache.ignite.IgniteCache
+import org.apache.ignite.IgniteQueue
 import org.apache.ignite.Ignition
 import org.apache.ignite.configuration.CacheConfiguration
+import org.apache.ignite.configuration.CollectionConfiguration
 import org.apache.ignite.configuration.IgniteConfiguration
 import org.apache.ignite.configuration.PersistentStoreConfiguration
 
 import javax.cache.expiry.Duration
 import javax.cache.expiry.TouchedExpiryPolicy
+import java.util.concurrent.Executors
 
 import static com.auth0.jwt.algorithms.Algorithm.HMAC256
 import static java.util.concurrent.TimeUnit.DAYS
+import static java.util.concurrent.TimeUnit.SECONDS
 import static kimoora.util.Ids.randomStringId
 
 class KimooraServer implements Kimoora {
+
+    // Constants
+
+    private static final KIMOORA_PIPES = 'kimoora.pipes'
 
     private final File kimooraHome
 
@@ -28,6 +36,10 @@ class KimooraServer implements Kimoora {
     private Ignite ignite
 
     private RestEndpoint restEndpoint
+
+    private final pipeExecutor = Executors.newCachedThreadPool()
+
+    // Constructors
 
     KimooraServer(File kimooraHome, Invoker invoker, Authentication authentication) {
         this.kimooraHome = kimooraHome
@@ -53,6 +65,8 @@ class KimooraServer implements Kimoora {
         }
 
         addUser('admin', 'admin', ['admin'])
+
+        startPipes()
 
         this
     }
@@ -94,11 +108,6 @@ class KimooraServer implements Kimoora {
 
     // Cache operations
 
-    private IgniteCache<String, Map<String, Object>> cache(String cacheName) {
-        ignite.getOrCreateCache(new CacheConfiguration<String, Map<String, Object>>().setName("cache_${cacheName}").
-                setExpiryPolicyFactory(TouchedExpiryPolicy.factoryOf(new Duration(DAYS, 2))))
-    }
-
     void cachePut(String cacheName, String key, Map<String, Object> value) {
         cache(cacheName).put(key, value)
     }
@@ -116,10 +125,83 @@ class KimooraServer implements Kimoora {
         entries.inject([]) { keys, entry -> keys << entry.key; keys }
     }
 
+    private IgniteCache<String, Map<String, Object>> cache(String cacheName) {
+        ignite.getOrCreateCache(new CacheConfiguration<String, Map<String, Object>>().setName("cache_${cacheName}").
+                setExpiryPolicyFactory(TouchedExpiryPolicy.factoryOf(new Duration(DAYS, 2))))
+    }
+
     // Invoke operations
 
     Map<String, Object> invoke(String operation, Map<String, Object> event) {
         invoker.invoke(this, operation, event)
+    }
+
+    // Streams operations
+
+    @Override
+    void sendToStream(String stream, String eventId, Map<String, Object> event) {
+        ignite.queue(stream, 0, new CollectionConfiguration()).add([key: eventId, event: event])
+    }
+
+    @Override
+    void addPipe(String pipeId, Map<String, Object> pipeDefinition) {
+        pipesCache().put(pipeId, pipeDefinition)
+        startPipe(pipeId)
+    }
+
+    private IgniteCache<String, Map<String, Object>> pipesCache() {
+        ignite.getOrCreateCache(KIMOORA_PIPES)
+    }
+
+    private void startPipe(String pipeId) {
+        def pipeDefinition = pipesCache().get(pipeId) as Map<String, Object>
+
+        def from = pipeDefinition.from as String
+        def queue = ignite.queue(from, 0, new CollectionConfiguration())
+
+        def function = pipeDefinition.function as String
+
+        def to = pipeDefinition.to as String
+        IgniteQueue targetQueue
+        if(to != null) {
+            targetQueue = ignite.queue(to, 0, new CollectionConfiguration())
+        }
+
+        def cache = pipeDefinition.cache as String
+        25.times {
+            pipeExecutor.submit(new Runnable() {
+                @Override
+                void run() {
+                    while(true) {
+                        def event = queue.poll(1, SECONDS) as Map
+                        if(event == null) {
+                            continue
+                        }
+
+                        Map<String, Object> result
+                        if(cache != null) {
+                            result = cacheGet(cache, event.key as String)
+                            if(result == null) {
+                                result = invoke(function, event)
+                                cachePut(cache,  event.key as String, result)
+                            }
+                        } else {
+                            result = invoke(function, event)
+                        }
+
+                        if(to != null) {
+                            targetQueue.add(result)
+                        }
+                    }
+                }
+            })
+        }
+    }
+
+    private void startPipes() {
+        pipesCache().each {
+            startPipe(it.key as String)
+        }
     }
 
 }

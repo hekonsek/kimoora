@@ -64,6 +64,14 @@ class RestEndpoint {
                         def payload = new ObjectMapper().readValue(exchange.inputStream, Map)
                         kimooraServer.addUser(path[1], payload.password as String, payload.roles as List<String>)
                         response = [status: 'OK']
+                    } else if (path.first() == 'sendToStream') {
+                        def payload = new ObjectMapper().readValue(exchange.inputStream, Map)
+                        kimooraServer.sendToStream(path[1], path[2], payload)
+                        response = [status: 'OK']
+                    } else if (path.first() == 'addPipe') {
+                        def payload = new ObjectMapper().readValue(exchange.inputStream, Map)
+                        kimooraServer.addPipe(path[1], payload)
+                        response = [status: 'OK']
                     } else {
                         throw new UnsupportedOperationException(path.first())
                     }

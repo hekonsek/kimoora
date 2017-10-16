@@ -4,8 +4,10 @@ import kimoora.client.KimooraClient
 import kimoora.client.KimooraUsernamePasswordTokenProvider
 import org.junit.Test
 
+import static kimoora.util.Ids.randomStringId
 import static kimoora.util.Ids.uuid
 import static org.assertj.core.api.Assertions.assertThat
+import static org.awaitility.Awaitility.await
 
 class KimooraTest {
 
@@ -21,20 +23,24 @@ class KimooraTest {
 
     def key = uuid()
 
-    def value = [foo: uuid()]
+    def event = [foo: uuid()]
 
     def function = uuid()
 
+    def pipeId = "pipeId-${randomStringId()}"
+
+    def pipe = [from: randomStringId(), function: function, cache: randomStringId()]
+
     @Test
     void shouldGetFromCache() {
-        kimoora.cachePut(cacheName, key, value)
+        kimoora.cachePut(cacheName, key, event)
         def value = kimoora.cacheGet(cacheName, key)
-        assertThat(value).isEqualTo(this.value)
+        assertThat(value).isEqualTo(this.event)
     }
 
     @Test
     void shouldRemoveFromCache() {
-        kimoora.cachePut(cacheName, key, value)
+        kimoora.cachePut(cacheName, key, event)
         kimoora.cacheRemove(cacheName, key)
         def value = kimoora.cacheGet(cacheName, key)
         assertThat(value).isNull()
@@ -42,7 +48,7 @@ class KimooraTest {
 
     @Test
     void shouldListCacheKeys() {
-        kimoora.cachePut(cacheName, key, value)
+        kimoora.cachePut(cacheName, key, event)
         def keys = kimoora.cacheKeys(cacheName)
         assertThat(keys).contains(key)
     }
@@ -59,6 +65,24 @@ class KimooraTest {
 
         // Then
         assertThat(response).containsEntry('hello', 'world')
+    }
+
+    // Pipes tests
+
+    @Test
+    void shouldCacheProcessedStream() {
+        // Given
+        kimoora.registerFunctionDefinition(function, [artifact: 'hekonsek/echogo'])
+        kimoora.addPipe(pipeId, pipe)
+
+        // When
+        kimoora.sendToStream(pipe.from, key, event)
+
+        // Then
+        await().untilAsserted {
+            def cachedResult = kimoora.cacheGet(pipe.cache, key)
+            assertThat(cachedResult).isNotNull()
+        }
     }
 
 }
