@@ -1,25 +1,21 @@
 package kimoora
 
 import kimoora.client.KimooraClient
-import kimoora.client.MockTokenProvider
-import kimoora.util.Ids
+import kimoora.client.KimooraUsernamePasswordTokenProvider
 import org.junit.Test
 
-import static kimoora.util.Ids.randomStringId
 import static kimoora.util.Ids.uuid
 import static org.assertj.core.api.Assertions.assertThat
 
 class KimooraTest {
 
-    static secret = randomStringId()
-
     static {
-        new KimooraBuilder(secret).build()
+        new KimooraBuilder().build()
     }
 
-    def tokenProvider = new MockTokenProvider(secret,'tenant', 'admin', 'admin')
+    def endpointUrl = 'http://localhost:8080'
 
-    def kimoora = new KimooraClient(tokenProvider,'http://localhost:8080')
+    def kimoora = new KimooraClient(new KimooraUsernamePasswordTokenProvider(endpointUrl, 'admin', 'admin'), endpointUrl)
 
     def cacheName = uuid()
 

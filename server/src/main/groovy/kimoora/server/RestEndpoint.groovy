@@ -27,9 +27,17 @@ class RestEndpoint {
             @Override
             void handleRequest(HttpServerExchange exchange) {
                 try {
-                    def subject = authentication.authenticate(exchange)
                     def uri = exchange.requestURI.substring(1)
                     def path = uri.split(/\//)
+
+                    if(path.first() == 'login') {
+                        def payload = new ObjectMapper().readValue(exchange.inputStream, Map)
+                        def response = [token: kimooraServer.login(payload.username as String, payload.password as String)]
+                        exchange.getResponseSender().send(jsonString(response))
+                        return
+                    }
+
+                    authentication.authenticate(exchange)
 
                     Object response
                     if (path.first() == 'registerFunctionDefinition') {
@@ -52,6 +60,10 @@ class RestEndpoint {
                         response = [status: 'OK']
                     } else if (path.first() == 'cacheKeys') {
                         response = [keys: kimooraServer.cacheKeys(path[1])]
+                    } else if (path.first() == 'addUser') {
+                        def payload = new ObjectMapper().readValue(exchange.inputStream, Map)
+                        kimooraServer.addUser(path[1], payload.password as String, payload.roles as List<String>)
+                        response = [status: 'OK']
                     } else {
                         throw new UnsupportedOperationException(path.first())
                     }

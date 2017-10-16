@@ -2,6 +2,14 @@ package kimoora
 
 interface Kimoora {
 
+    // User management operations
+
+    void addUser(String username, String password, List<String> roles)
+
+    String login(String username, String password)
+
+    // Functions definitions operations
+
     void registerFunctionDefinition(String function, Map<String, Object> functionDefinition)
 
     Map<String, Object> getFunctionDefinition(String function)

@@ -22,14 +22,11 @@ import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.interfaces.DecodedJWT
 import io.undertow.server.HttpServerExchange
 import org.apache.commons.lang3.Validate
+import org.apache.ignite.IgniteCache
 
 class JwtAuthentication implements Authentication {
 
-    private final String secret
-
-    JwtAuthentication(String secret) {
-        this.secret = secret
-    }
+    private IgniteCache<String, String> tokenCache
 
     @Override
     AuthenticationSubject authenticate(HttpServerExchange exchange) {
@@ -37,14 +34,17 @@ class JwtAuthentication implements Authentication {
         Validate.notBlank(authHeader, 'Authentication header cannot be blank.')
         def token = authHeader.replaceFirst(/Bearer /, '')
 
-        Algorithm algorithm = Algorithm.HMAC256(secret)
+        Algorithm algorithm = Algorithm.HMAC256(tokenCache.get('secret'))
         JWTVerifier verifier = JWT.require(algorithm).build()
         DecodedJWT jwt = verifier.verify(token);
-        def tenant = jwt.getClaim("tenant").asString()
-        def username = jwt.getClaim("username").asString()
+        def username = jwt.getSubject()
         def roles = jwt.getClaim("roles").asArray(String)
 
-        new AuthenticationSubject(tenant, username, roles.toList())
+        new AuthenticationSubject(username, roles.toList())
+    }
+
+    void setKimoora(KimooraServer kimoora) {
+        tokenCache = kimoora.@ignite.getOrCreateCache('kimoora_jwt_secret')
     }
 
 }

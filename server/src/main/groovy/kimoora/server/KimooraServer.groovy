@@ -1,5 +1,6 @@
 package kimoora.server
 
+import com.auth0.jwt.JWT
 import kimoora.Kimoora
 import kimoora.invoke.Invoker
 import org.apache.ignite.Ignite
@@ -12,7 +13,9 @@ import org.apache.ignite.configuration.PersistentStoreConfiguration
 import javax.cache.expiry.Duration
 import javax.cache.expiry.TouchedExpiryPolicy
 
+import static com.auth0.jwt.algorithms.Algorithm.HMAC256
 import static java.util.concurrent.TimeUnit.DAYS
+import static kimoora.util.Ids.randomStringId
 
 class KimooraServer implements Kimoora {
 
@@ -44,10 +47,42 @@ class KimooraServer implements Kimoora {
 
         this.restEndpoint = new RestEndpoint(this, authentication).start()
 
+        def tokenCache = ignite.getOrCreateCache('kimoora_jwt_secret')
+        if(!tokenCache.containsKey('secret')) {
+            tokenCache.put('secret', randomStringId())
+        }
+
+        addUser('admin', 'admin', ['admin'])
+
         this
     }
 
-    // Functions registry operations
+    // User management operations
+
+    @Override
+    void addUser(String username, String password, List<String> roles) {
+        if(ignite.getOrCreateCache('kimoora_users').containsKey(username)) {
+            throw new IllegalStateException('User already exists.')
+        }
+        ignite.getOrCreateCache('kimoora_users').put(username, [password: password, roles: roles])
+    }
+
+    @Override
+    String login(String username, String password) {
+        def user = ignite.getOrCreateCache('kimoora_users').get(username) as Map
+        if(user.password != password) {
+            throw new IllegalArgumentException('Invalid login attempt.')
+        }
+
+        def tokenSecret = ignite.getOrCreateCache('kimoora_jwt_secret').get('secret') as String
+        def algorithm = HMAC256(tokenSecret)
+        String[] roles = (user.roles as List).toArray()
+        JWT.create().
+                withSubject(username).withArrayClaim("roles", roles).
+                sign(algorithm)
+    }
+
+    // Functions definitions operations
 
     void registerFunctionDefinition(String function, Map<String, Object> functionDefinition) {
         ignite.getOrCreateCache('kimoora_functions').put(function, functionDefinition)

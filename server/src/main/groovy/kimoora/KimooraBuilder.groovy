@@ -9,15 +9,9 @@ import static com.google.common.io.Files.createTempDir
 
 class KimooraBuilder {
 
-    private final String tokenSecret
-
     private File kimooraHome = createTempDir()
 
     private Invoker invoker = new LocalDockerExecInvoker()
-
-    KimooraBuilder(String tokenSecret) {
-        this.tokenSecret = tokenSecret
-    }
 
     KimooraBuilder kimooraHome(File kimooraHome) {
         this.kimooraHome = kimooraHome
@@ -30,7 +24,10 @@ class KimooraBuilder {
     }
 
     Kimoora build() {
-        new KimooraServer(kimooraHome, invoker, new JwtAuthentication(tokenSecret)).start()
+        def authorization = new JwtAuthentication()
+        new KimooraServer(kimooraHome, invoker, authorization).start().with {
+            authorization.setKimoora(it)
+        }
     }
 
 }

@@ -26,6 +26,16 @@ class KimooraClient implements Kimoora {
     }
 
     @Override
+    void addUser(String username, String password, List<String> roles) {
+        validateOkResponse(request("addUser/${username}", [password: password, roles: roles]))
+    }
+
+    @Override
+    String login(String username, String password) {
+        request('login', [username: username, password: password])
+    }
+
+    @Override
     void registerFunctionDefinition(String function, Map<String, Object> functionDefinition) {
         validateOkResponse(request("registerFunctionDefinition/${function}", functionDefinition))
     }
