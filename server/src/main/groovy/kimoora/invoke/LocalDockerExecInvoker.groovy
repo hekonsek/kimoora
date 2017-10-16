@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import kimoora.server.KimooraServer
 import kpipes.binding.util.docker.CommandLineDocker
 import kpipes.binding.util.docker.ContainerBuilder
+import kpipes.binding.util.process.Command
 import kpipes.binding.util.process.DefaultProcessManager
 import kpipes.binding.util.process.SudoResolver
 
@@ -18,8 +19,9 @@ class LocalDockerExecInvoker implements Invoker {
 
         def environment = [FRONT_DOOR_ENDPOINT: 'localhost']
 
+        new DefaultProcessManager(new SudoResolver()).execute(Command.cmd("docker pull ${artifact}")).size()
         def commandResponse = new CommandLineDocker(new DefaultProcessManager(new SudoResolver())).execute(new ContainerBuilder(artifact).cleanUp(true).net('host').environment(environment).arguments(eventJson).build())
-        def response = commandResponse.find{ !it.startsWith('Unable to find image') }
+        def response = commandResponse.first()
 
         json.readValue(response, Map)
     }
