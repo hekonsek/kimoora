@@ -110,7 +110,19 @@ class KimooraTest {
         def response = kimoora.invoke(functionId, [hello: 'world'])
 
         // Then
-        assertThat(response).containsEntry('hello', 'world')
+        assertThat(response.payload as Map).containsEntry('hello', 'world')
+    }
+
+    @Test
+    void shouldInjectTokenIntoInvokingEventMetadata() {
+        // Given
+        kimoora.registerFunctionDefinition(functionId, [artifact: 'hekonsek/echogo'])
+
+        // When
+        def response = kimoora.invoke(functionId, [hello: 'world'])
+
+        // Then
+        assertThat(response.metadata as Map).containsKey('token')
     }
 
     // Streams tests

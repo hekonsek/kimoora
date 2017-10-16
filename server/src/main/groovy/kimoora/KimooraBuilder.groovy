@@ -2,7 +2,7 @@ package kimoora
 
 import kimoora.invoke.Invoker
 import kimoora.invoke.LocalDockerExecInvoker
-import kimoora.server.JwtAuthentication
+import kimoora.server.JwtAuthenticationProvider
 import kimoora.server.KimooraServer
 
 import static com.google.common.io.Files.createTempDir
@@ -24,7 +24,7 @@ class KimooraBuilder {
     }
 
     Kimoora build() {
-        def authorization = new JwtAuthentication()
+        def authorization = new JwtAuthenticationProvider()
         new KimooraServer(kimooraHome, invoker, authorization).start().with {
             authorization.setKimoora(it)
         }

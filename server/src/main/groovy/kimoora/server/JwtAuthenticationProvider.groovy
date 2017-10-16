@@ -24,12 +24,12 @@ import io.undertow.server.HttpServerExchange
 import org.apache.commons.lang3.Validate
 import org.apache.ignite.IgniteCache
 
-class JwtAuthentication implements Authentication {
+class JwtAuthenticationProvider implements AuthenticationProvider {
 
     private IgniteCache<String, String> tokenCache
 
     @Override
-    AuthenticationSubject authenticate(HttpServerExchange exchange) {
+    AuthenticationResults authenticate(HttpServerExchange exchange) {
         def authHeader = exchange.requestHeaders.getFirst('Authentication')
         Validate.notBlank(authHeader, 'Authentication header cannot be blank.')
         def token = authHeader.replaceFirst(/Bearer /, '')
@@ -40,7 +40,7 @@ class JwtAuthentication implements Authentication {
         def username = jwt.getSubject()
         def roles = jwt.getClaim("roles").asArray(String)
 
-        new AuthenticationSubject(username, roles.toList())
+        new AuthenticationResults(token, username, roles.toList())
     }
 
     void setKimoora(KimooraServer kimoora) {

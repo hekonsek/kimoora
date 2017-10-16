@@ -31,7 +31,7 @@ class KimooraServer implements Kimoora {
 
     private final Invoker invoker
 
-    private final Authentication authentication
+    private final AuthenticationProvider authentication
 
     private Ignite ignite
 
@@ -41,7 +41,7 @@ class KimooraServer implements Kimoora {
 
     // Constructors
 
-    KimooraServer(File kimooraHome, Invoker invoker, Authentication authentication) {
+    KimooraServer(File kimooraHome, Invoker invoker, AuthenticationProvider authentication) {
         this.kimooraHome = kimooraHome
         this.invoker = invoker
         this.authentication = authentication

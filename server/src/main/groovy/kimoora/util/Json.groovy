@@ -33,12 +33,20 @@ final class Json {
         mapper.writeValueAsString(object)
     }
 
+    static <T> T fromJson(InputStream json, Class<T> type) {
+        mapper.readValue(json, type)
+    }
+
     static <T> T fromJson(byte[] json, Class<T> type) {
         mapper.readValue(json, type)
     }
 
     static <T> T fromJson(String json, Class<T> type) {
         mapper.readValue(json, type)
+    }
+
+    static Map<String, Object> fromJson(InputStream json) {
+        fromJson(json, Map)
     }
 
     static Map<String, Object> fromJson(byte[] json) {

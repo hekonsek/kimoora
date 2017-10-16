@@ -6,6 +6,7 @@ import io.undertow.server.HttpHandler
 import io.undertow.server.HttpServerExchange
 import io.undertow.server.handlers.BlockingHandler
 
+import static kimoora.util.Json.fromJson
 import static kimoora.util.Json.jsonString
 import static org.apache.commons.lang3.StringUtils.isNotBlank
 
@@ -13,9 +14,9 @@ class RestEndpoint {
 
     private final KimooraServer kimooraServer
 
-    private final Authentication authentication
+    private final AuthenticationProvider authentication
 
-    RestEndpoint(KimooraServer kimooraServer, Authentication authentication) {
+    RestEndpoint(KimooraServer kimooraServer, AuthenticationProvider authentication) {
         this.kimooraServer = kimooraServer
         this.authentication = authentication
     }
@@ -31,13 +32,13 @@ class RestEndpoint {
                     def path = uri.split(/\//)
 
                     if(path.first() == 'login') {
-                        def payload = new ObjectMapper().readValue(exchange.inputStream, Map)
+                        def payload = fromJson(exchange.inputStream)
                         def response = [token: kimooraServer.login(payload.username as String, payload.password as String)]
                         exchange.getResponseSender().send(jsonString(response))
                         return
                     }
 
-                    authentication.authenticate(exchange)
+                    def authenticationResults = authentication.authenticate(exchange)
 
                     Object response
                     if (path.first() == 'registerFunctionDefinition') {
@@ -49,8 +50,9 @@ class RestEndpoint {
                     } else if (path.first() == 'listFunctionsDefinitions') {
                         response = kimooraServer.listFunctionsDefinitions()
                     } else if (path.first() == 'invoke') {
-                        def payload = new ObjectMapper().readValue(exchange.inputStream, Map)
-                        response = kimooraServer.invoke(path[1], payload)
+                        def payload = fromJson(exchange.inputStream)
+                        def event = [payload: payload, metadata: [token: authenticationResults.token()]]
+                        response = kimooraServer.invoke(path[1], event)
                     } else if (path.first() == 'cacheGet') {
                         response = kimooraServer.cacheGet(path[1], path[2])
                     } else if (path.first() == 'cachePut') {
