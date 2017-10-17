@@ -53,7 +53,37 @@ func (thisKimoora Kimoora) CachePut(cacheName string, key string, value map[stri
 	var responseJson map[string]interface{}
 	json.Unmarshal(bodyBytes, &responseJson)
 	if responseJson["status"] != "OK" {
-		return errors.New("invalid response from Kimmora server")
+		return errors.New("invalid response from Kimoora server")
+	}
+
+	return nil
+}
+
+func (thisKimoora Kimoora) StreamSendTo(streamName string, value map[string]interface{}) error  {
+	url := fmt.Sprintf("%s/streamSendTo/%s", thisKimoora.FrontDoorEndpoint, streamName)
+	valueJson, err := json.Marshal(value)
+	if err != nil {
+		return err
+	}
+
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(valueJson))
+	req.Header.Set("Authentication", "Bearer " + thisKimoora.Token)
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := thisKimoora.HttpClient.Do(req)
+	if err != nil {
+		return err
+	}
+
+	body := resp.Body
+	defer body.Close()
+	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+	var responseJson map[string]interface{}
+	json.Unmarshal(bodyBytes, &responseJson)
+	if responseJson["status"] != "OK" {
+		return errors.New("invalid response from Kimoora server")
 	}
 
 	return nil

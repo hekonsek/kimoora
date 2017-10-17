@@ -79,9 +79,9 @@ class RestEndpoint {
                         def payload = new ObjectMapper().readValue(exchange.inputStream, Map)
                         kimooraServer.addUser(path[1], payload.password as String, payload.roles as List<String>)
                         response = [status: 'OK']
-                    } else if (path.first() == 'sendToStream') {
+                    } else if (path.first() == 'streamSendTo') {
                         def payload = new ObjectMapper().readValue(exchange.inputStream, Map)
-                        kimooraServer.sendToStream(path[1], path[2], payload)
+                        kimooraServer.streamSendTo(path[1], payload)
                         response = [status: 'OK']
                     } else if (path.first() == 'streamBacklogSize') {
                         response = [backlogSize: kimooraServer.streamBacklogSize(path[1])]

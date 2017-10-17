@@ -169,8 +169,8 @@ class KimooraServer implements Kimoora {
     // Streams operations
 
     @Override
-    void sendToStream(String stream, String eventId, Map<String, Object> event) {
-        ignite.queue(stream, 0, new CollectionConfiguration()).add([key: eventId, event: event])
+    void streamSendTo(String stream, Map<String, Object> event) {
+        ignite.queue(stream, 0, new CollectionConfiguration()).add(event)
     }
 
     @Override
@@ -216,30 +216,35 @@ class KimooraServer implements Kimoora {
                 @Override
                 void run() {
                     while(true) {
-                        def event = queue.poll(1, SECONDS) as Map
-                        if(event == null) {
-                            continue
-                        }
+                        try {
+                            def event = queue.poll(1, SECONDS) as Map
+                            if (event == null) {
+                                continue
+                            }
 
-                        Map<String, Object> result
-                        if(cache != null) {
-                            result = cacheGet(cache, event.key as String)
-                            if(result == null) {
+                            event.metadata.environment = pipeDefinition.environment
+                            Map<String, Object> result
+                            if (cache != null) {
+                                result = cacheGet(cache, event.key as String)
+                                if (result == null) {
+                                    result = invoke(function, event)
+                                    cachePut(cache, event.key as String, result)
+                                }
+                            } else {
                                 result = invoke(function, event)
-                                cachePut(cache,  event.key as String, result)
                             }
-                        } else {
-                            result = invoke(function, event)
-                        }
 
-                        if(to != null) {
-                            targetQueue.add(result)
-                        }
-
-                        if(multicast != null) {
-                            targetQueues.each {
-                                it.add(result)
+                            if (to != null) {
+                                targetQueue.add(result)
                             }
+
+                            if (multicast != null) {
+                                targetQueues.each {
+                                    it.add(result)
+                                }
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace()
                         }
                     }
                 }

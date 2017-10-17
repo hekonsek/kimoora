@@ -24,7 +24,9 @@ class KimooraTest {
 
     def key = uuid()
 
-    def event = [foo: uuid()]
+    def value = [foo: uuid()]
+
+    def event = [key: uuid(), payload: value, metadata: [:]]
 
     def collection = randomUUID().toString()
 
@@ -55,14 +57,14 @@ class KimooraTest {
 
     @Test
     void shouldGetFromCache() {
-        kimoora.cachePut(cacheName, key, event)
+        kimoora.cachePut(cacheName, key, value)
         def value = kimoora.cacheGet(cacheName, key)
-        assertThat(value).isEqualTo(this.event)
+        assertThat(value).isEqualTo(this.value)
     }
 
     @Test
     void shouldRemoveFromCache() {
-        kimoora.cachePut(cacheName, key, event)
+        kimoora.cachePut(cacheName, key, value)
         kimoora.cacheRemove(cacheName, key)
         def value = kimoora.cacheGet(cacheName, key)
         assertThat(value).isNull()
@@ -70,7 +72,7 @@ class KimooraTest {
 
     @Test
     void shouldListCacheKeys() {
-        kimoora.cachePut(cacheName, key, event)
+        kimoora.cachePut(cacheName, key, value)
         def keys = kimoora.cacheKeys(cacheName)
         assertThat(keys).contains(key)
     }
@@ -79,14 +81,14 @@ class KimooraTest {
 
     @Test
     void shouldGetDocument() {
-        kimoora.documentPut(collection, key, event)
+        kimoora.documentPut(collection, key, value)
         def value = kimoora.documentGet(collection, key)
-        assertThat(value).isEqualTo(this.event)
+        assertThat(value).isEqualTo(this.value)
     }
 
     @Test
     void shouldRemoveFromDocuments() {
-        kimoora.documentPut(collection, key, event)
+        kimoora.documentPut(collection, key, value)
         kimoora.documentRemove(collection, key)
         def value = kimoora.documentGet(collection, key)
         assertThat(value).isNull()
@@ -94,7 +96,7 @@ class KimooraTest {
 
     @Test
     void shouldListDocumentKeys() {
-        kimoora.documentPut(collection, key, event)
+        kimoora.documentPut(collection, key, value)
         def keys = kimoora.documentsKeys(collection)
         assertThat(keys).contains(key)
     }
@@ -134,11 +136,11 @@ class KimooraTest {
         kimoora.addPipe(pipeId, pipe)
 
         // When
-        kimoora.sendToStream(pipe.from, key, event)
+        kimoora.streamSendTo(pipe.from, event)
 
         // Then
         await().untilAsserted {
-            def cachedResult = kimoora.cacheGet(pipe.cache, key)
+            def cachedResult = kimoora.cacheGet(pipe.cache, event.key)
             assertThat(cachedResult).isNotNull()
         }
     }
@@ -153,7 +155,7 @@ class KimooraTest {
         kimoora.addPipe(pipeId, pipe)
 
         // When
-        kimoora.sendToStream(pipe.from, key, event)
+        kimoora.streamSendTo(pipe.from, event)
 
         // Then
         await().untilAsserted {

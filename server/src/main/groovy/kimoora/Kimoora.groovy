@@ -42,7 +42,7 @@ interface Kimoora {
 
     // Streams operations
 
-    void sendToStream(String stream, String eventId, Map<String, Object> event)
+    void streamSendTo(String stream, Map<String, Object> event)
 
     int streamBacklogSize(String stream)
 

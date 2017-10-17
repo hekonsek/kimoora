@@ -106,8 +106,8 @@ class KimooraClient implements Kimoora {
     // Streams operations
 
     @Override
-    void sendToStream(String stream, String eventId, Map<String, Object> event) {
-        validateOkResponse(request("sendToStream/${stream}/${eventId}", event))
+    void streamSendTo(String stream, Map<String, Object> event) {
+        validateOkResponse(request("streamSendTo/${stream}", event))
     }
 
     @Override

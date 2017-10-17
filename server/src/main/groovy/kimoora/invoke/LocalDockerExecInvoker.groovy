@@ -1,6 +1,8 @@
 package kimoora.invoke
 
+import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.google.common.base.MoreObjects
 import kimoora.server.KimooraServer
 import kimoora.util.docker.CommandLineDocker
 import kimoora.util.docker.ContainerBuilder
@@ -22,6 +24,9 @@ class LocalDockerExecInvoker implements Invoker {
         def artifact = functionDefinition.artifact as String
 
         def environment = [KIMOORA_FRONT_DOOR_ENDPOINT: 'http://localhost:8080']
+        (MoreObjects.firstNonNull(event.metadata.environment as Map, [:])).entrySet().each {
+            environment[it.key] = it.value
+        }
 
         def imageExists = new DefaultProcessManager(new SudoResolver()).execute(Command.cmd("docker images ${artifact}")).size() > 1
         if (!imageExists) {
@@ -30,7 +35,11 @@ class LocalDockerExecInvoker implements Invoker {
         def commandResponse = new CommandLineDocker(new DefaultProcessManager(new SudoResolver())).execute(new ContainerBuilder(artifact).cleanUp(true).net('host').environment(environment).arguments(eventJson).build())
         def response = commandResponse.first()
 
-        json.readValue(response, Map)
+        try {
+            json.readValue(response, Map)
+        } catch (JsonParseException e) {
+            throw new RuntimeException("Cannot parse JSON: ${commandResponse}. Operation: ${operation}. Event: ${event}")
+        }
     }
 
 }
