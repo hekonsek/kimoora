@@ -16,15 +16,17 @@ type Kimoora struct {
 
 	Token string
 
+	HttpClient* http.Client
+
 }
 
 func KimmoraClient(frontDoorEndpoint string, token string) Kimoora {
-	return Kimoora{FrontDoorEndpoint: frontDoorEndpoint, Token: token}
+	return Kimoora{FrontDoorEndpoint: frontDoorEndpoint, Token: token, HttpClient: &http.Client{}}
 }
 
 func DiscoverKimmoraClient(token string) Kimoora {
 	frontDoorEndpoint := os.Getenv("KIMOORA_FRONT_DOOR_ENDPOINT")
-	return Kimoora{FrontDoorEndpoint: frontDoorEndpoint, Token:token}
+	return Kimoora{FrontDoorEndpoint: frontDoorEndpoint, Token:token, HttpClient: &http.Client{}}
 }
 
 func (thisKimoora Kimoora) CachePut(cacheName string, key string, value map[string]interface{}) error  {
@@ -37,8 +39,7 @@ func (thisKimoora Kimoora) CachePut(cacheName string, key string, value map[stri
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(valueJson))
 	req.Header.Set("Authentication", "Bearer " + thisKimoora.Token)
 	req.Header.Set("Content-Type", "application/json")
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := thisKimoora.HttpClient.Do(req)
 	if err != nil {
 		return err
 	}
