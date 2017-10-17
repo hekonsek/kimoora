@@ -21,17 +21,6 @@ class DefaultDataGridService implements DataGridService {
 
     private final Ignite ignite
 
-    DefaultDataGridService(File igniteDirectory) {
-        def persistenceConfig = new PersistentStoreConfiguration().
-                setPersistentStorePath("${igniteDirectory.absolutePath}/store").
-                setWalStorePath("${igniteDirectory.absolutePath}/wal_store").
-                setWalArchivePath("${igniteDirectory.absolutePath}/wal_archive")
-
-        def igniteConfig = new IgniteConfiguration().setPersistentStoreConfiguration(persistenceConfig)
-        ignite = Ignition.start(igniteConfig)
-        ignite.active(true)
-    }
-
     // SQL operations
 
     void assertSqlSchema(String table, Map<String, Object> schema) {
